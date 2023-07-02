@@ -69,7 +69,6 @@ async function forwardLatestRSS() {
           // console.log('messageText:', messageText);
           const disablePreview = { disable_web_page_preview: true };
 
-
           // 发送消息到频道
           // bot.sendMessage(channelID, messageText, { parse_mode: 'HTML' });
           axios.post(`https://api.telegram.org/bot${botToken}/sendMessage`, {
@@ -89,8 +88,6 @@ async function forwardLatestRSS() {
       .catch(error => {
         console.error('Error:', error);
       });
-
-
 
     console.log('转发了新内容。');
   } catch (error) {
