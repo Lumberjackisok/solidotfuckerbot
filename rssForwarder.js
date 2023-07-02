@@ -65,7 +65,7 @@ async function forwardLatestRSS() {
 
           const formattedDate = moment(isoDate).utcOffset(8).format('YYYY-MM-DD HH:mm:ss');
           // 组合消息文本
-          const messageText = `<a href="${link}"><b>${title}</b></a>\n\n${formattedDate} by ${via}\n\n${content}\n\n${url}\n\n${tag}`;
+          const messageText = `<a href="${link}"><b>${title}</b></a>\n\n${formattedDate} by ${via}\n\n${content}\n\n${url}\n\n#${tag}`;
           // console.log('messageText:', messageText);
           const disablePreview = { disable_web_page_preview: true };
 
