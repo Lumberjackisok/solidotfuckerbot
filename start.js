@@ -1,6 +1,6 @@
 const http = require('http');
 const { spawn } = require('child_process');
-
+const port = process.env.PORT;
 // 启动服务器
 const server = http.createServer((req, res) => {
   res.statusCode = 200;
@@ -26,7 +26,7 @@ const runCode = () => {
 };
 
 // 启动服务器并运行代码
-server.listen(3000, 'localhost', () => {
+server.listen(port, 'localhost', () => {
   console.log('Server is running.');
   runCode();
 });
