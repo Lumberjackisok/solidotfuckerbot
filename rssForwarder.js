@@ -33,7 +33,7 @@ fs.readFile('lastLink.txt', 'utf8', (err, data) => {
 
 
 // 定义定时任务间隔时间（单位：毫秒）
-const interval = 10000; // 每分钟刷新一次
+const interval = 60000; // 每分钟刷新一次
 
 // 定义定时任务
 setInterval(forwardLatestRSS, interval);
