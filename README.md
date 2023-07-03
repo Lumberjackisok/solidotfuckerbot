@@ -5,7 +5,7 @@ npm install
 
 ## step 2
 ```sh
-node rssForwarder.js
+node start.js
 ```
 ## About
 1. 建议在援引信息时附上出处。  
