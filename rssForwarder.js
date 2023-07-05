@@ -6,7 +6,7 @@ const moment = require('moment');
 const fs = require('fs');
 
 // 填入你的Telegram Bot Token
-const botToken = 'process.env.TELEGRAM_BOT_TOKEN';  // process.env.TELEGRAM_BOT_TOKEN;
+const botToken = process.env.TELEGRAM_BOT_TOKEN;  // process.env.TELEGRAM_BOT_TOKEN;
 
 // 填入你的Telegram频道ID
 const channelID = '@SolidotFree';//@testsolidotfucker  @SolidotFree
@@ -65,7 +65,7 @@ async function forwardLatestRSS() {
       }
     })
     //过滤出有效数据，并反转数组
-    finalmessage = finalmessage.filter(item => item).reverse();
+    finalmessage = finalmessage.filter(item => item);
     console.log('finalmessage:', finalmessage);
 
     if (res.length === 0) {
