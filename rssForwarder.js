@@ -34,7 +34,7 @@ try {
 
 
 // 定义定时任务间隔时间（单位：毫秒）
-const interval = 60000; // 每分钟刷新一次
+// const interval = 60000; // 每分钟刷新一次
 
 // 定义定时任务
 // setInterval(forwardLatestRSS, interval);
@@ -45,18 +45,19 @@ async function forwardLatestRSS() {
     // 解析RSS数据
     let feedres = await parser.parseURL(rssURL);
     let feed = feedres.items;
-    // feed = feed.reverse();
+    feed = feed.reverse();
 
 
 
     // 获取最新的文章链接
     let link = feed.map(item => item.link);
-    // link = link.reverse();
+    link = link.reverse();
     // console.log('link:', link);
 
     // 获取最新link中与lastlink不同的link
     let res = lastLink.length ? link.filter((item) => { return !lastLink.includes(item) }) : link;
     // console.log('res:', res);
+    res = res.reverse();
 
     //获取res对应的内容
     let finalmessage = feed.map(item => {
@@ -66,6 +67,7 @@ async function forwardLatestRSS() {
     })
     //过滤出有效数据，并反转数组
     finalmessage = finalmessage.filter(item => item);
+    // finalmessage = finalmessage.reverse();
     console.log('finalmessage:', finalmessage);
 
     if (res.length === 0) {
@@ -96,7 +98,7 @@ async function forwardLatestRSS() {
       }
     });
 
-    for (let i = 0; i < res.length; i++) {
+    for (let i = res.length - 1; i >= 0; i--) {
       // console.log('res[i]:', res[i]);
       // console.log('feed[i]:', feed[i]);
 
