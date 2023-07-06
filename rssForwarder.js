@@ -16,11 +16,13 @@ module.exports = {
     // 存储上一次转发的最新文章链接
     let lastLink = [];
 
+
+
     try {
       // 读取持久化存储中的链接
       fs.readFile('lastLink.json', 'utf8', (err, data) => {
-        console.log('data:', data);
-        console.log('err:', err);
+        // console.log('data:', data);
+        // console.log('err:', err);
         if (!err) {
           lastLink = JSON.parse(data);
           console.log('从持久化存储读取到的链接:', lastLink);
@@ -32,15 +34,15 @@ module.exports = {
       // 解析RSS数据
       let feedres = await parser.parseURL(rssURL);
       let feed = feedres.items;
-      feed = feed.reverse();
+
 
       // 获取最新的文章链接
       let link = feed.map(item => item.link);
-      link = link.reverse();
+
 
       // 获取最新link中与lastlink不同的link
       let res = lastLink.length ? link.filter((item) => { return !lastLink.includes(item) }) : link;
-      res = res.reverse();
+      // console.log('res:', res);
 
       //获取res对应的内容
       let finalmessage = feed.map(item => {
@@ -48,8 +50,7 @@ module.exports = {
           return item;
         }
       })
-      //过滤出有效数据，并反转数组
-      finalmessage = finalmessage.filter(item => item);
+
 
       if (res.length === 0) {
         console.log('没有新内容。');
@@ -58,8 +59,9 @@ module.exports = {
 
       //将新link和保存的旧link合并，并从数组后面去掉新link.length的条数，使保存的link数始终保持20条
       let pushlinks = res.concat(lastLink);
-      let count = res.length === link.length ? 0 : -res.length;
+      let count = res.length === link.length ? res.length : -res.length;
       pushlinks = pushlinks.slice(0, count)
+      // console.log('pushlinks:', pushlinks);
 
       // 将链接更新到持久化存储文件
       fs.writeFile('lastLink.json', JSON.stringify(pushlinks), (err) => {
@@ -70,9 +72,14 @@ module.exports = {
         }
       });
 
-      for (let i = res.length - 1; i >= 0; i--) {
+
+
+      //遍历最新消息
+      for (let i = 0; i < res.length; i++) {
+
         setTimeout(() => {
-          axios.get(res[i])
+          // console.log('res[res.length - i]:', res[res.length - 1 - i]);
+          axios.get(res[res.length - 1 - i])
             .then(response => {
               if (response.status === 200) {
                 //获取到原内容的原文链接
@@ -85,22 +92,24 @@ module.exports = {
                 let url = finalcontent.match(regex).toString();
                 url = url.replace(/,/g, '');
                 url = url.replace(/<br>/g, '\n');
-                console.log('url:', url);
+                // console.log('url:', url);
 
                 // 获取最新文章的标题和内容
-                const title = finalmessage[i].title;
-                const content = finalmessage[i].contentSnippet;
-                const link = finalmessage[i].link;
-                const isoDate = finalmessage[i].isoDate
+                const title = finalmessage[res.length - 1 - i].title;
+                const content = finalmessage[res.length - 1 - i].contentSnippet;
+                const link = finalmessage[res.length - 1 - i].link;
+                const isoDate = finalmessage[res.length - 1 - i].isoDate
 
                 const formattedDate = moment(isoDate).utcOffset(8).format('YYYY-MM-DD HH:mm:ss');
 
+
+                const sendMessage = `<a href="${link}"><b>${title}</b></a>\n\n${formattedDate} by ${via}\n\n${content}\n\n${url}\n\n#${tag}`
 
                 const disablePreview = { disable_web_page_preview: true };
                 // 发送消息到频道
                 axios.post(`https://api.telegram.org/bot${botToken}/sendMessage`, {
                   chat_id: channelID,
-                  text: `<a href="${link}"><b>${title}</b></a>\n\n${formattedDate} by ${via}\n\n${content}\n\n${url}\n\n#${tag}`,
+                  text: sendMessage,
                   parse_mode: 'HTML',
                   ...disablePreview
                 })
@@ -115,9 +124,8 @@ module.exports = {
             .catch(error => {
               console.error('Error:', error);
             });
-        }, i * 5000)
+        }, i * 3000)
 
-        console.log('转发了新内容。');
       }
     } catch (error) {
       console.error('错误:', error);
