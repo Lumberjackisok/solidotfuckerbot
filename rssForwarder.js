@@ -60,11 +60,12 @@ module.exports = {
 
       // 获取最新的文章链接
       let link = feed.map(item => item.link);
+      console.log('link:', link);
 
 
       // 获取最新link中与lastlink不同的link
       let res = lastLink.length ? link.filter((item) => { return !lastLink.includes(item) }) : link;
-      // console.log('res:', res);
+      console.log('res:', res);
 
       //获取res对应的内容
       let finalmessage = feed.map(item => {
