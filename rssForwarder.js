@@ -2,11 +2,12 @@ const Parser = require('rss-parser');
 const axios = require('axios');
 const cheerio = require('cheerio');
 const moment = require('moment');
-const fs = require('fs');
 
-const botToken = process.env.TELEGRAM_BOT_TOKEN;//process.env.TELEGRAM_BOT_TOKEN;
+const botToken = process.env.TELEGRAM_BOT_TOKEN; //process.env.TELEGRAM_BOT_TOKEN;
 const channelID = '@SolidotFree';//@testsolidotfucker  @SolidotFree
+const groupID = process.env.groupID;
 const rssURL = 'https://www.solidot.org/index.rss';
+
 
 module.exports = {
   forwardLatestRSS: async function () {
@@ -16,19 +17,40 @@ module.exports = {
     // 存储上一次转发的最新文章链接
     let lastLink = [];
 
-
-
     try {
-      // 读取持久化存储中的链接
-      fs.readFile('lastLink.json', 'utf8', (err, data) => {
-        // console.log('data:', data);
-        // console.log('err:', err);
-        if (!err) {
-          lastLink = JSON.parse(data);
-          console.log('从持久化存储读取到的链接:', lastLink);
+      //从群组获取持久化储存的链接
+      const config = {
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        params: {
+          chat_id: groupID
         }
-      });
+      };
+
+      // Axios request URL
+      const url = `https://api.telegram.org/bot${botToken}/getChat`;
+
+      // Axios request payload
+      const payload = {
+        limit: 1
+      };
+
+      // Send Axios request to Telegram Bot API
+      axios.post(url, payload, config)
+        .then(response => {
+          // Parse response data to get the first message
+          lastLink = response.data.result.pinned_message.text.split(',');
+          console.log('从群组持久化存储读取到的链接::', lastLink);
+        })
+        .catch(error => {
+          console.error(error);
+        });
+
     } catch (err) { console.log('readFile err', err); }
+
+
+
 
     try {
       // 解析RSS数据
@@ -63,14 +85,56 @@ module.exports = {
       pushlinks = pushlinks.slice(0, count)
       // console.log('pushlinks:', pushlinks);
 
-      // 将链接更新到持久化存储文件
-      fs.writeFile('lastLink.json', JSON.stringify(pushlinks), (err) => {
-        if (err) {
-          console.error('Error writing to file:', err);
-        } else {
-          console.log('链接已更新到持久化存储。');
+      // 将链接更新到群组并置顶，实现持久化存储链接
+
+      //向telegram群聊发送链接并置顶
+      const config = {
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        params: {
+          chat_id: groupID
         }
-      });
+      };
+
+      // Axios request URL
+      const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
+
+      const disablePreview = { disable_web_page_preview: true };
+
+      // Axios request payload
+      const payload = {
+        text: pushlinks.join(','),
+        disable_notification: true,
+        parse_mode: 'HTML',
+        ...disablePreview
+      };
+
+      // Send Axios request to Telegram Bot API
+      axios.post(url, payload, config)
+        .then(response => {
+          // Parse response data to get the first message
+          const result = response.data.result;
+
+          //置顶该消息
+          const pinPayload = {
+            chat_id: groupID,
+            message_id: result.message_id,
+            disable_notification: true
+          };
+
+          axios.post(`https://api.telegram.org/bot${botToken}/pinChatMessage`, pinPayload)
+            .then(response => {
+              console.log(response.data);
+            })
+            .catch(error => {
+              console.error(error);
+            });
+
+        })
+        .catch(error => {
+          console.error(error);
+        })
 
 
 
