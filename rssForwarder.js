@@ -5,7 +5,7 @@ const moment = require('moment');
 
 const botToken = process.env.TELEGRAM_BOT_TOKEN; //process.env.TELEGRAM_BOT_TOKEN;
 const channelID = '@SolidotFree';//@testsolidotfucker  @SolidotFree
-const groupID = process.env.groupID;
+const groupID = process.env.groupID;//process.env.groupID
 const rssURL = 'https://www.solidot.org/index.rss';
 
 
@@ -37,7 +37,7 @@ module.exports = {
       };
 
       // Send Axios request to Telegram Bot API
-      axios.post(url, payload, config)
+      await axios.post(url, payload, config)
         .then(response => {
           // Parse response data to get the first message
           lastLink = response.data.result.pinned_message.text.split(',');
@@ -112,8 +112,8 @@ module.exports = {
       };
 
       // Send Axios request to Telegram Bot API
-      axios.post(url, payload, config)
-        .then(response => {
+      await axios.post(url, payload, config)
+        .then(async response => {
           // Parse response data to get the first message
           const result = response.data.result;
 
@@ -124,7 +124,7 @@ module.exports = {
             disable_notification: true
           };
 
-          axios.post(`https://api.telegram.org/bot${botToken}/pinChatMessage`, pinPayload)
+          await axios.post(`https://api.telegram.org/bot${botToken}/pinChatMessage`, pinPayload)
             .then(response => {
               console.log(response.data);
             })
@@ -142,10 +142,10 @@ module.exports = {
       //遍历最新消息
       for (let i = 0; i < res.length; i++) {
 
-        setTimeout(() => {
+        setTimeout(async () => {
           // console.log('res[res.length - i]:', res[res.length - 1 - i]);
-          axios.get(res[res.length - 1 - i])
-            .then(response => {
+          await axios.get(res[res.length - 1 - i])
+            .then(async response => {
               if (response.status === 200) {
                 //获取到原内容的原文链接
                 const $ = cheerio.load(response.data);
@@ -172,7 +172,7 @@ module.exports = {
 
                 const disablePreview = { disable_web_page_preview: true };
                 // 发送消息到频道
-                axios.post(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+                await axios.post(`https://api.telegram.org/bot${botToken}/sendMessage`, {
                   chat_id: channelID,
                   text: sendMessage,
                   parse_mode: 'HTML',
